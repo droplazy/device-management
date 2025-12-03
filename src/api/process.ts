@@ -170,3 +170,17 @@ export const deleteProcesses = (processIds: string[]) =>
     },
   })
 
+export const assignProcessToDevice = (
+  processId: string,
+  processName: string,
+  serialNumber: string,
+) =>
+  post('/process/todev', {
+    timestamp: new Date().toISOString(),
+    data: {
+      process_name: processName,
+      process_id: processId,
+      serial_number: serialNumber,
+    },
+  })
+

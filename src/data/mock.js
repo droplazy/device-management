@@ -7,6 +7,8 @@ export const mockDevices = [
         traffic: '56841.12MB',
         lastHeartbeat: '2025-11-21 15:51',
         ip: '192.168.111.222',
+        processName: '测试流程1',
+        processId: 'P001',
         nextAction: {
             name: '洗澡',
             start: '2025-10-25 14:00:12',
@@ -20,6 +22,8 @@ export const mockDevices = [
         currentAction: '闲置',
         traffic: '56841.12MB',
         lastHeartbeat: '2025-11-22 15:51',
+        processName: '测试流程1',
+        processId: 'P001',
     },
     {
         serialNumber: 'SN999323',
@@ -28,6 +32,8 @@ export const mockDevices = [
         currentAction: '闲置',
         traffic: '56841.12MB',
         lastHeartbeat: '2025-11-23 15:51',
+        processName: '测试流程1',
+        processId: 'P001',
     },
     {
         serialNumber: 'SN999324',
@@ -36,6 +42,18 @@ export const mockDevices = [
         currentAction: '闲置',
         traffic: '56841.12MB',
         lastHeartbeat: '2025-11-24 15:51',
+        processName: '测试流程2',
+        processId: 'P002',
+    },
+    {
+        serialNumber: 'SN999325',
+        status: '离线',
+        location: '杭州',
+        currentAction: '闲置',
+        traffic: '56841.12MB',
+        lastHeartbeat: '2025-11-25 15:51',
+        processName: '测试流程2',
+        processId: 'P002',
     },
 ];
 export const defaultSteps = [

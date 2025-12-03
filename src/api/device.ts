@@ -17,6 +17,8 @@ export interface DeviceListResponse {
       current_action: string
       traffic_statistics: string
       last_heartbeat: string
+      process_name?: string
+      process_id?: string
     }[]
   }
 }
@@ -52,18 +54,19 @@ export const fetchDeviceBySerial = (serialNumber: string) =>
     params: { serial_number: serialNumber },
   })
 
-export interface SendCommandPayload { 
+export interface SendCommandPayload {
   action: string
   subAction: string
   serialNumbers: string[]
   startTime?: string
   endTime?: string
+  remark?: string
 }
 
 export const sendDeviceCommand = (payload: SendCommandPayload) => {
   // 将时间格式从 "YYYY-MM-DD HH:mm" 转换为 ISO 8601 格式 "YYYY-MM-DDTHH:mm:ssZ"
   const formatTimeToISO = (timeStr: string | undefined) => {
-    if (!timeStr) return undefined
+    if (!timeStr) return ''
     // 如果已经是 ISO 格式，直接返回
     if (timeStr.includes('T') || timeStr.includes('Z')) return timeStr
     // 否则转换格式：YYYY-MM-DD HH:mm -> YYYY-MM-DDTHH:mm:00Z
@@ -77,20 +80,16 @@ export const sendDeviceCommand = (payload: SendCommandPayload) => {
     action: string
     sub_action: string
     serial_numbers: string[]
-    start_time?: string
-    end_time?: string
+    start_time: string
+    end_time: string
+    remark: string
   } = {
     action: payload.action,
     sub_action: payload.subAction,
     serial_numbers: payload.serialNumbers,
-  }
-
-  // 只有在提供了时间字段时才添加
-  if (payload.startTime) {
-    data.start_time = formatTimeToISO(payload.startTime)
-  }
-  if (payload.endTime) {
-    data.end_time = formatTimeToISO(payload.endTime)
+    start_time: formatTimeToISO(payload.startTime),
+    end_time: formatTimeToISO(payload.endTime),
+    remark: payload.remark ?? '',
   }
 
   return post('/device/command', {

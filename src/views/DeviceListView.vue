@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, reactive, ref, onMounted } from 'vue'
+import { computed, reactive, ref, onMounted, onBeforeUnmount } from 'vue'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import {
   actionOptions,
   subActionOptions,
+  mockProcessList,
 } from '@/data/mock'
 import {
   fetchDeviceList,
@@ -14,6 +15,7 @@ import {
   type DeviceListResponse,
   type DeviceDetailResponse,
 } from '@/api/device'
+import { assignProcessToDevice, fetchProcessList } from '@/api/process'
 import { useMockData } from '@/config/app'
 import { mockDevices } from '@/data/mock'
 import type { Device } from '@/types'
@@ -23,6 +25,9 @@ const keyword = ref('')
 const selectedKeys = ref<string[]>([])
 const tableLoading = ref(false)
 const detailLoading = ref(false)
+const processOptions = ref<{ label: string; value: string }[]>([])
+const processLoading = ref(false)
+const processBindingSerial = ref('')
 
 const isAddDeviceOpen = ref(false)
 const isCommandOpen = ref(false)
@@ -57,6 +62,8 @@ const mapDevice = (
   currentAction: item.current_action,
   traffic: item.traffic_statistics,
   lastHeartbeat: item.last_heartbeat,
+  processName: item.process_name,
+  processId: item.process_id,
 })
 
 const formatDateTime = (dateTimeStr: string) => {
@@ -108,7 +115,59 @@ const loadDevices = async () => {
   }
 }
 
-onMounted(loadDevices)
+const loadProcessOptions = async () => {
+  if (useMockData) {
+    processOptions.value = mockProcessList.map((item) => ({
+      label: item.processName,
+      value: item.processId,
+    }))
+    return
+  }
+
+  processLoading.value = true
+  try {
+    const res = await fetchProcessList()
+    processOptions.value = res.data.map((item) => ({
+      label: item.process_name,
+      value: item.process_id,
+    }))
+  } catch (error) {
+    message.error('获取流程列表失败')
+  } finally {
+    processLoading.value = false
+  }
+}
+
+let devicesRefreshTimer: ReturnType<typeof setInterval> | null = null
+let processRefreshTimer: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  loadDevices()
+  loadProcessOptions()
+
+  devicesRefreshTimer = setInterval(() => {
+    if (!tableLoading.value) {
+      loadDevices()
+    }
+  }, 3000)
+
+  processRefreshTimer = setInterval(() => {
+    if (!processLoading.value) {
+      loadProcessOptions()
+    }
+  }, 10000)
+})
+
+onBeforeUnmount(() => {
+  if (devicesRefreshTimer) {
+    clearInterval(devicesRefreshTimer)
+    devicesRefreshTimer = null
+  }
+  if (processRefreshTimer) {
+    clearInterval(processRefreshTimer)
+    processRefreshTimer = null
+  }
+})
 
 const filteredDevices = computed(() =>
   devices.value.filter((item) =>
@@ -263,6 +322,7 @@ const handleSendCommand = async () => {
       serialNumbers: selectedKeys.value,
       startTime: commandForm.start,
       endTime: commandForm.end,
+      remark: commandForm.remark,
     })
     message.success('指令已推送到选中设备')
     isCommandOpen.value = false
@@ -274,6 +334,47 @@ const handleSendCommand = async () => {
 const handleActionChange = (action: string) => {
   commandForm.action = action
   commandForm.subAction = subActionOptions[action][0]
+}
+
+const handleProcessSelect = async (serialNumber: string, processId?: string) => {
+  const target = devices.value.find((item) => item.serialNumber === serialNumber)
+  if (!target) return
+
+  if (!processId) {
+    target.processId = ''
+    target.processName = ''
+    message.info(`设备 ${serialNumber} 已清空使用流程`)
+    return
+  }
+
+  const option = processOptions.value.find((opt) => opt.value === processId)
+  const processName = option?.label || ''
+
+  if (!processName) {
+    message.warning('无法识别选择的流程，请刷新后重试')
+    return
+  }
+
+  target.processId = processId
+  target.processName = processName
+
+  if (useMockData) {
+    message.success(`已模拟将流程《${processName}》应用到设备 ${serialNumber}`)
+    return
+  }
+
+  processBindingSerial.value = serialNumber
+  try {
+    await assignProcessToDevice(processId, processName, serialNumber)
+    message.success(`设备 ${serialNumber} 已切换为流程《${processName}》`)
+  } catch (error) {
+    message.error('绑定流程失败，请稍后重试')
+    // 回滚
+    target.processId = ''
+    target.processName = ''
+  } finally {
+    processBindingSerial.value = ''
+  }
 }
 </script>
 
@@ -349,6 +450,24 @@ const handleActionChange = (action: string) => {
       <a-table-column title="当前动作" data-index="currentAction" />
       <a-table-column title="流量统计" data-index="traffic" />
       <a-table-column title="最后一次心跳" data-index="lastHeartbeat" />
+      <a-table-column title="使用流程" key="process">
+        <template #default="{ record }">
+          <a-select
+            :value="record.processId || undefined"
+            placeholder="请选择流程"
+            style="min-width: 180px"
+            :options="processOptions"
+            :loading="processLoading || processBindingSerial === record.serialNumber"
+            option-label-prop="label"
+            allow-clear
+            @change="(value) => handleProcessSelect(record.serialNumber, value as string | undefined)"
+          >
+            <template v-if="!processOptions.length" #notFoundContent>
+              <span>暂无流程，请先创建</span>
+            </template>
+          </a-select>
+        </template>
+      </a-table-column>
     </a-table>
   </section>
 

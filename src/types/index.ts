@@ -8,6 +8,8 @@ export interface Device {
   traffic: string
   lastHeartbeat: string
   ip?: string
+  processName?: string
+  processId?: string
   nextAction?: {
     name: string
     start: string
