@@ -50,8 +50,8 @@ const mapStepToRaw = (step: ProcessStep) => {
     step: step.step,
     action: step.action,
     sub_action: step.subAction,
-    start_time: dayjs(step.startTime).format('HH:mm:ss'), // 直接使用原始的 startTime 字符串
-    end_time: dayjs(step.endTime).format('HH:mm:ss'), // 直接使用原始的 endTime 字符串
+    start_time: dayjs(step.startTime, 'HH:mm:ss').format('HH:mm:ss'), // 使用字符串格式化
+    end_time: dayjs(step.endTime, 'HH:mm:ss').format('HH:mm:ss'),     //
     remark: step.remark ?? '', // 如果 remark 为 null 或 undefined，使用空字符串
   }
 }
