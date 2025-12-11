@@ -8,27 +8,18 @@ export const fetchDeviceList = () => get('/device', {
 export const fetchDeviceBySerial = (serialNumber) => get('/device', {
     params: { serial_number: serialNumber },
 });
-const formatTimeToISO = (timeStr) => {
-    if (!timeStr)
-        return '';
-    if (typeof timeStr === 'string' && (timeStr.includes('T') || timeStr.includes('Z')))
-        return timeStr;
-    const dateTime = dayjs(timeStr, 'YYYY-MM-DD HH:mm');
-    if (!dateTime.isValid())
-        return typeof timeStr === 'string' ? timeStr : '';
-    return dateTime.utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
-};
 export const sendDeviceCommand = (payload) => post('/device/command', {
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString(), // 使用本地时间的字符串表示，而不是ISO格式
     data: {
         action: payload.action,
         sub_action: payload.subAction,
         serial_numbers: payload.serialNumbers,
-        start_time: formatTimeToISO(payload.startTime),
-        end_time: formatTimeToISO(payload.endTime),
-        remark: (payload.remark ?? ''),
+        start_time: payload.startTime, // 直接使用传入的 startTime
+        end_time: payload.endTime, // 直接使用传入的 endTime
+        remark: payload.remark ?? '', // 如果 remark 为 null 或 undefined，使用空字符串
     },
 });
+
 export const addDevice = (serialNumber, verificationCode) => post('/device/add', {
     timestamp: new Date().toISOString(),
     data: {

@@ -64,31 +64,20 @@ export interface SendCommandPayload {
 }
 
 export const sendDeviceCommand = (payload: SendCommandPayload) => {
-  // 将时间格式从 "YYYY-MM-DD HH:mm" 转换为 ISO 8601 格式 "YYYY-MM-DDTHH:mm:ssZ"
-  const formatTimeToISO = (timeStr: string | undefined) => {
-    if (!timeStr) return ''
-    // 如果已经是 ISO 格式，直接返回
-    if (timeStr.includes('T') || timeStr.includes('Z')) return timeStr
-    // 否则转换格式：YYYY-MM-DD HH:mm -> YYYY-MM-DDTHH:mm:00Z
-    const dateTime = dayjs(timeStr, 'YYYY-MM-DD HH:mm')
-    if (!dateTime.isValid()) return timeStr
-    // 转换为 UTC 时间并格式化为 ISO 8601（带 Z 后缀表示 UTC）
-    return dateTime.utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
-  }
-
   const data: {
     action: string
     sub_action: string
     serial_numbers: string[]
-    start_time: string
-    end_time: string
+    // start_time: string
+    // end_time: string
     remark: string
   } = {
     action: payload.action,
     sub_action: payload.subAction,
     serial_numbers: payload.serialNumbers,
-    start_time: formatTimeToISO(payload.startTime),
-    end_time: formatTimeToISO(payload.endTime),
+    // 直接使用传入的字符串值，而不调用 formatTimeToISO 函数
+    // start_time: payload.startTime ?? '',
+    // end_time: payload.endTime ?? '',
     remark: payload.remark ?? '',
   }
 
@@ -97,6 +86,7 @@ export const sendDeviceCommand = (payload: SendCommandPayload) => {
     data,
   })
 }
+
 
 export const addDevice = (serialNumber: string, verificationCode: string) =>
   post(

@@ -315,15 +315,15 @@ const handleSendCommand = async () => {
     isCommandOpen.value = false
     return
   }
-  try {
-    await sendDeviceCommand({
-      action: commandForm.action,
-      subAction: commandForm.subAction,
-      serialNumbers: selectedKeys.value,
-      startTime: commandForm.start,
-      endTime: commandForm.end,
-      remark: commandForm.remark,
-    })
+try {
+  await sendDeviceCommand({
+    action: commandForm.action,
+    subAction: commandForm.subAction,
+    serialNumbers: selectedKeys.value,
+    startTime: dayjs(commandForm.start).format('HH:mm:ss'),  // Format the start time
+    endTime: dayjs(commandForm.end).format('HH:mm:ss'),  // Format the end time
+    remark: commandForm.remark,
+  });
     message.success('指令已推送到选中设备')
     isCommandOpen.value = false
   } catch (error) {
@@ -529,19 +529,17 @@ const handleProcessSelect = async (serialNumber: string, processId?: string) => 
       </a-form-item>
       <div class="time-grid">
         <a-form-item label="开始时间" required>
-          <a-date-picker
+          <a-time-picker
             v-model:value="commandForm.start"
-            :show-time="{ format: 'HH:mm' }"
-            value-format="YYYY-MM-DD HH:mm"
-            style="width: 100%"
+     format="HH:mm:ss"
+    style="width: 100%"
           />
         </a-form-item>
         <a-form-item label="结束时间" required>
-          <a-date-picker
+          <a-time-picker
             v-model:value="commandForm.end"
-            :show-time="{ format: 'HH:mm' }"
-            value-format="YYYY-MM-DD HH:mm"
-            style="width: 100%"
+    format="HH:mm:ss"
+    style="width: 100%"
           />
         </a-form-item>
       </div>

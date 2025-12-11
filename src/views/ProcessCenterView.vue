@@ -260,18 +260,18 @@ const removeStep = (index: number) => {
           </div>
           <div class="step-grid">
             <a-form-item label="开始时间">
-              <a-date-picker
+              <a-time-picker
                 v-model:value="step.startTime"
-                :show-time="{ format: 'HH:mm' }"
-                value-format="YYYY-MM-DD HH:mm"
+                :show-time="{ format: 'HH:mm:ss' }"
+                value-format="HH:mm:ss"
                 style="width: 100%"
               />
             </a-form-item>
             <a-form-item label="结束时间">
-              <a-date-picker
+              <a-time-picker
                 v-model:value="step.endTime"
-                :show-time="{ format: 'HH:mm' }"
-                value-format="YYYY-MM-DD HH:mm"
+                :show-time="{ format: 'HH:mm:ss' }"
+                value-format="HH:mm:ss"
                 style="width: 100%"
               />
             </a-form-item>

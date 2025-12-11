@@ -44,30 +44,18 @@ export const fetchProcessSteps = (processId: string) =>
     params: { process_id: processId },
   })
 
-// 下方几个写操作只负责把前端结构改成接口需要的字段名
+/// 下方几个写操作只负责把前端结构改成接口需要的字段名
 const mapStepToRaw = (step: ProcessStep) => {
-  // 将时间格式从 "YYYY-MM-DD HH:mm" 转换为 ISO 8601 格式 "YYYY-MM-DDTHH:mm:ssZ"
-  const formatTimeToISO = (timeStr: string) => {
-    if (!timeStr) return ''
-    // 如果已经是 ISO 格式，直接返回
-    if (timeStr.includes('T') || timeStr.includes('Z')) return timeStr
-    // 否则转换格式：YYYY-MM-DD HH:mm -> YYYY-MM-DDTHH:mm:00Z
-    // 将本地时间字符串解析为 dayjs 对象（视为本地时间）
-    const dateTime = dayjs(timeStr, 'YYYY-MM-DD HH:mm')
-    if (!dateTime.isValid()) return timeStr
-    // 转换为 UTC 时间并格式化为 ISO 8601（带 Z 后缀表示 UTC）
-    return dateTime.utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
-  }
-
   return {
     step: step.step,
     action: step.action,
     sub_action: step.subAction,
-    start_time: formatTimeToISO(step.startTime),
-    end_time: formatTimeToISO(step.endTime),
-    remark: step.remark ?? '',
+    start_time: dayjs(step.startTime).format('HH:mm:ss'), // 直接使用原始的 startTime 字符串
+    end_time: dayjs(step.endTime).format('HH:mm:ss'), // 直接使用原始的 endTime 字符串
+    remark: step.remark ?? '', // 如果 remark 为 null 或 undefined，使用空字符串
   }
 }
+
 
 export const createProcess = (
   processName: string,

@@ -208,22 +208,18 @@ const handleDelete = (index: number) => {
       </a-table-column>
       <a-table-column title="开始时间" :width="220">
         <template #default="{ record }">
-          <a-date-picker
+          <a-time-picker
             v-model:value="record.startTime"
-            :show-time="{ format: 'HH:mm' }"
-            value-format="YYYY-MM-DD HH:mm"
-            :locale="datePickerLocale"
+            format="HH:mm:ss"
             style="width: 100%"
           />
         </template>
       </a-table-column>
       <a-table-column title="结束时间" :width="220">
         <template #default="{ record }">
-          <a-date-picker
+          <a-time-picker
             v-model:value="record.endTime"
-            :show-time="{ format: 'HH:mm' }"
-            value-format="YYYY-MM-DD HH:mm"
-            :locale="datePickerLocale"
+            format="HH:mm:ss"
             style="width: 100%"
           />
         </template>
